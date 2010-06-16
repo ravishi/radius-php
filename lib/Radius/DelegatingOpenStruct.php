@@ -23,13 +23,12 @@ class DelegatingOpenStruct
             return $this->hash[$key];
         }
         else if ($this->parent !== null && isset($this->parent->{$key})) {
-            $this->hash[$key] = & $this->parent->{$key};
+            return $this->parent->__get($key);
         }
         else {
             $this->hash[$key] = null;
+            return $this->hash[$key];
         }
-
-        return $this->hash[$key];
     }
 
     public function __set($key, $value)
