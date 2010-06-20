@@ -16,12 +16,13 @@ class Context
         $this->globals = new DelegatingOpenStruct;
     }
 
-    /**
-     * TODO: should we move this into a __get magic method?
-     */
-    public function getGlobals()
+    public function __get($key)
     {
-        return $this->globals;
+        if ($key == 'globals') {
+            return $this->globals;
+        } 
+
+        throw new \Exception(sprintf("tried to get an undefined property %s::%s", get_class($this), $attr));
     }
 
     public function defineTag($name, $callable)
@@ -64,7 +65,7 @@ class Context
 
     public function tagMissing($name, $attr = array(), $block = null)
     {
-        throw new UndefinedTagError($name);
+        throw new Error\UndefinedTagError($name);
     }
 
     public function getCurrentNesting()

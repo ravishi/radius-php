@@ -63,17 +63,17 @@ class TagBinding implements \ArrayAccess
         return $this->context->renderTag($tag, $args, $block);
     }
 
-    public function __get($attr)
+    public function __get($key)
     {
-        $attr = isset($attrAlias[$attr]) ? $attrAlias[$attr] : $attr;
+        if ($key == 'attributes') $key = 'attr';
 
-        if ($attr == 'globals') {
+        if ($key == 'globals') {
             return $this->context->getGlobals();
-        } else if (in_array($attr, self::$attrAccessor)) {
-            return $this->{$attr};
+        } else if (in_array($key, self::$attrAccessor)) {
+            return $this->{$key};
         }
 
-        // throw an error?
+        throw new \Exception(sprintf("tried to get an undefined property %s::%s", get_class($this), $key));
     }
 
     public function offsetExists($attr)

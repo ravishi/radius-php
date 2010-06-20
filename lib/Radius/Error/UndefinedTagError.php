@@ -1,6 +1,6 @@
 <?php
 
-namespace Radius;
+namespace Radius\Error;
 
 class UndefinedTagError extends Error
 {

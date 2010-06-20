@@ -71,7 +71,7 @@ class Parser
             case 'close':
                 $popped = array_pop($this->stack);
                 if ($popped->name !== $tok['name']) {
-                    throw new WrongEndTagError($popped->name, $tok['name'], $this->stack);
+                    throw new Error\WrongEndTagError($popped->name, $tok['name'], $this->stack);
                 }
                 $popped->onParse(function($with) use ($context, $popped) {
                     return $context->renderTag($popped->name, $popped->attributes, function() use ($with) {
@@ -88,17 +88,17 @@ class Parser
                 break;
                 // @codeCoverageIgnoreStart
             case 'tasteless':
-                throw new TastelessTagError($tok, $this->stack);
+                throw new Error\TastelessTagError($tok, $this->stack);
                 break;
             default:
-                throw new UndefinedFlavorError($tok, $this->stack);
+                throw new Error\UndefinedFlavorError($tok, $this->stack);
                 break;
                 // @codeCoverageIgnoreEnd
             }
         }
 
         if (count($this->stack) != 1) {
-            throw new MissingEndTagError(end($this->stack)->name, $this->stack);
+            throw new Error\MissingEndTagError(end($this->stack)->name, $this->stack);
         }
     }
 }
