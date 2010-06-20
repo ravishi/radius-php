@@ -31,7 +31,7 @@ class ContextTest extends \PHPUnit_Framework_TestCase
 
     public function testRenderTag_UndefinedTag()
     {
-        $this->setExpectedException('Radius\\UndefinedTagError');
+        $this->setExpectedException('Radius\\Error\\UndefinedTagError');
         $this->context->renderTag('undefined_tag');
     }
 

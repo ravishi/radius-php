@@ -68,7 +68,7 @@ class TagBinding implements \ArrayAccess
         if ($key == 'attributes') $key = 'attr';
 
         if ($key == 'globals') {
-            return $this->context->getGlobals();
+            return $this->context->globals;
         } else if (in_array($key, self::$attrAccessor)) {
             return $this->{$key};
         }

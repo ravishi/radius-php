@@ -149,7 +149,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase
 
     public function testParseTag_BindingDoMissing()
     {
-        $this->setExpectedException('Radius\\UndefinedTagError');
+        $this->setExpectedException('Radius\\Error\\UndefinedTagError');
         $this->context->defineTag('test', function($t) { $t->missing(); });
         $this->parser->parse('<r:test />');
     }
@@ -227,13 +227,13 @@ class ParserTest extends \PHPUnit_Framework_TestCase
 
     public function testParseFailOnMissingEndTag()
     {
-        $this->setExpectedException('Radius\\MissingEndTagError');
+        $this->setExpectedException('Radius\\Error\\MissingEndTagError');
         $this->parser->parse('<r:open>');
     }
 
     public function testParseFailOnWrongEndTag()
     {
-        $this->setExpectedException('Radius\\WrongEndTagError');
+        $this->setExpectedException('Radius\\Error\\WrongEndTagError');
         $this->parser->parse('<r:open></r:not_open>');
     }
   
