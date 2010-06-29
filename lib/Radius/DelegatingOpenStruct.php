@@ -2,19 +2,16 @@
 
 namespace Radius;
 
-/**
- * PONDER: qual a diferença de não retornar __get por referência?
- */
 class DelegatingOpenStruct
 {
-    private
+    protected
         $hash,
-        $parent;
+        $object;
 
-    public function __construct(DelegatingOpenStruct $parent = null)
+    public function __construct(DelegatingOpenStruct $object = null)
     {
         $this->hash = array();
-        $this->parent = $parent;
+        $this->object = $object;
     }
 
     public function & __get($key)
@@ -22,8 +19,8 @@ class DelegatingOpenStruct
         if (isset($this->hash[$key])) {
             return $this->hash[$key];
         }
-        else if ($this->parent !== null && isset($this->parent->{$key})) {
-            return $this->parent->__get($key);
+        else if ($this->object !== null && isset($this->object->{$key})) {
+            return $this->object->__get($key);
         }
         else {
             $this->hash[$key] = null;
@@ -38,7 +35,7 @@ class DelegatingOpenStruct
 
     public function __isset($key)
     {
-        return isset($this->hash[$key]) ? true : isset($this->parent->{$key});
+        return isset($this->hash[$key]) ? true : isset($this->object->{$key});
     }
 
     public function __unset($key)

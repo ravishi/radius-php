@@ -27,7 +27,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase
             'attr_export'   => function($t) { return var_export($t->getAttrs(), true); },
         ));
 
-        $this->parser = new Parser($this->context);
+        $this->parser = new Parser($this->context, 'r');
     }
 
     public function testInitializationWithOptions()
@@ -35,20 +35,13 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         $this->parser = new Parser(new TestContext);
         $this->assertType(__NAMESPACE__.'\\TestContext', $this->parser->context);
 
-        $this->parser = new Parser(array('context' => new TestContext));
-        $this->assertType(__NAMESPACE__.'\\TestContext', $this->parser->context);
-
-        $this->parser = new Parser(array('tag_prefix' => 'radius'));
+        $this->parser = new Parser(null, 'r');
         $this->assertType('Radius\\Context', $this->parser->context);
-        $this->assertEquals($this->parser->tag_prefix, 'radius');
+        $this->assertEquals($this->parser->tagPrefix, 'r');
 
-        $this->parser = new Parser(new TestContext, array('tag_prefix' => 'radius'));
+        $this->parser = new Parser(new TestContext, 'r');
         $this->assertType(__NAMESPACE__.'\\TestContext', $this->parser->context);
-        $this->assertEquals($this->parser->tag_prefix, 'radius');
-
-        $this->parser = new Parser(array('context' => new TestContext, 'tag_prefix' => 'radius'));
-        $this->assertType(__NAMESPACE__.'\\TestContext', $this->parser->context);
-        $this->assertEquals($this->parser->tag_prefix, 'radius');
+        $this->assertEquals($this->parser->tagPrefix, 'r');
     }
 
     public function testParseIndividualTagsAndParameters()

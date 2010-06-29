@@ -4,7 +4,7 @@ namespace Radius;
 
 class Parser
 {
-    private
+    protected
         $stack,
         $current,
         $scanner,
@@ -12,23 +12,18 @@ class Parser
 
     public
         $context,
-        $tag_prefix = 'r';
+        $tagPrefix;
 
-    public function __construct($context = null, array $options = array())
+    public function __construct($context = null, $tagPrefix = 'radius')
     {
-        if (is_array($context) && empty($options))
-        {
-            $options = $context;
-            $context = isset($options['context']) ? $options['context'] : null;
+        if ($context instanceof Context) {
+            $this->context = $context;
+        }
+        else {
+            $this->context = new Context;
         }
 
-        $this->context = $context instanceof Context ? $context : new Context;
-
-        if (isset($options['tag_prefix'])) {
-            $this->tag_prefix = $options['tag_prefix'];
-        }
-
-        $this->scanner = new Scanner;
+        $this->tagPrefix = $tagPrefix;
     }
 
     public function parse($string)
@@ -47,7 +42,11 @@ class Parser
 
     protected function tokenize($string)
     {
-        $this->tokens = $this->scanner->operate($this->tag_prefix, $string);
+        if (!isset($this->scanner)) {
+            $this->scanner = new Scanner;
+        }
+
+        $this->tokens = $this->scanner->operate($this->tagPrefix, $string);
     }
 
     protected function stackUp()

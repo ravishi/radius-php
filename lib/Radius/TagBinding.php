@@ -11,10 +11,7 @@ class TagBinding implements \ArrayAccess
         $attr,
         $block;
 
-    static protected
-        $attrAccessor = array('context', 'locals', 'name', 'attr', 'block');
-
-    public function __construct(Context $context, DelegatingOpenStruct $locals, $name, array $attr = array(), $block = null)
+    public function __construct($context, DelegatingOpenStruct $locals, $name, array $attr = array(), $block = null)
     {
         $this->context = $context;
         $this->locals = $locals;
@@ -69,11 +66,11 @@ class TagBinding implements \ArrayAccess
 
         if ($key == 'globals') {
             return $this->context->globals;
-        } else if (in_array($key, self::$attrAccessor)) {
+        } else if (in_array($key, array('context', 'locals', 'name', 'attr', 'block'))) {
             return $this->{$key};
         }
 
-        throw new \Exception(sprintf("tried to get an undefined property %s::%s", get_class($this), $key));
+        throw new \Exception(sprintf("Property %s::%s does not exists", get_class($this), $key));
     }
 
     public function offsetExists($attr)

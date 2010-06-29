@@ -8,10 +8,8 @@ class Scanner
         $cursor,
         $position,
         $end,
-        $code,
+        $template,
         $tagPrefix;
-
-    const EOF               = -1;
 
     const POSITION_DATA     = 0;
     const POSITION_OPEN     = 1;
@@ -19,24 +17,17 @@ class Scanner
 
     const REGEX_NAME_CHAR   = '[\-A-Za-z0-9._:?]';
 
-    public function operate($tagPrefix, $code)
+    public function operate($tagPrefix, $template)
     {
-        $this->code = str_replace(array("\r\n", "\r"), "\n", $code);
+        $this->template = str_replace(array("\r\n", "\r"), "\n", $template);
         $this->cursor = 0;
-        $this->end = strlen($this->code);
+        $this->end = strlen($this->template);
         $this->position = self::POSITION_DATA;
         $this->tagPrefix = $tagPrefix;
 
         $tokens = array();
-        $end = false;
-        while (!$end) {
-            $token = $this->nextToken();
-            $end = $token === self::EOF;
+        while (false !== $token = $this->nextToken()) {
             $tokens[] = $token;
-        }
-
-        if (end($tokens) == self::EOF) {
-            array_pop($tokens);
         }
 
         return $tokens;
@@ -44,9 +35,9 @@ class Scanner
 
     protected function nextToken()
     {
-        // have we reached the end of the code?
+        // have we reached the end of the template?
         if ($this->cursor >= $this->end) {
-            return self::EOF;
+            return false;
         }
 
         switch ($this->position) {
@@ -61,18 +52,19 @@ class Scanner
             break;
         }
 
-        // it not an array, lets return it
+        // it's not an array. must be a string or something.
         if (!is_array($tokens)) {
             return $tokens;
         }
-        // its a token, lets return it
+        // it's a tag token.
         else if (isset($tokens['flavor'])) {
             return $tokens;
         }
-        // if its an empty array, lets get the next
+        // it's an empty array. lets get the next.
         else if (empty($tokens)) {
             return $this->nextToken();
         }
+        // what is it?
         else {
             return $tokens[0];
         }
@@ -82,11 +74,11 @@ class Scanner
     {
         $match = null;
 
-        $pos1 = strpos($this->code, "<{$this->tagPrefix}:", $this->cursor);
-        $pos2 = strpos($this->code, "</{$this->tagPrefix}:", $this->cursor);
+        $pos1 = strpos($this->template, "<{$this->tagPrefix}:", $this->cursor);
+        $pos2 = strpos($this->template, "</{$this->tagPrefix}:", $this->cursor);
 
         if (false === $pos1 && false === $pos2) {
-            $rv = substr($this->code, $this->cursor);
+            $rv = substr($this->template, $this->cursor);
             $this->cursor = $this->end;
 
             return $rv;
@@ -108,11 +100,12 @@ class Scanner
         // if we have data
         if (0 < ($len = $pos - $this->cursor))
         {
-            $text = substr($this->code, $this->cursor, $len);
+            $text = substr($this->template, $this->cursor, $len);
             $this->moveCursor($text);
             $result[] = $text;
         }
 
+        // is it a self-closing tag or a opening tag?
         if ($token[1] == '/') {
             $this->position = self::POSITION_CLOSE;
         } else {
@@ -125,7 +118,7 @@ class Scanner
     protected function lexOpenOrSelfTag()
     {
         if (preg_match('@<'.$this->tagPrefix.':('.self::REGEX_NAME_CHAR.'+)((?:\s+(?:'.self::REGEX_NAME_CHAR.'+)\s*=\s*(?:"(?:\\\"|[^"])*"|(?:\'(\\\\\'|[^\'])*\')))*)\s*/?>@A',
-            $this->code, $match, null, $this->cursor))
+            $this->template, $match, null, $this->cursor))
         {
             $this->moveCursor($match[0]);
             $this->position = self::POSITION_DATA;
@@ -138,7 +131,7 @@ class Scanner
 
     protected function lexCloseTag()
     {
-        if (preg_match('@</'.$this->tagPrefix.':('.self::REGEX_NAME_CHAR.'+)\s*>@A', $this->code, $match, null, $this->cursor))
+        if (preg_match('@</'.$this->tagPrefix.':('.self::REGEX_NAME_CHAR.'+)\s*>@A', $this->template, $match, null, $this->cursor))
         {
             $this->moveCursor($match[0]);
             $this->position = self::POSITION_DATA;
@@ -151,12 +144,13 @@ class Scanner
 
     protected function lexIncorrectTag()
     {
-        if (preg_match('@</?('.$this->tagPrefix.')?:?@A', $this->code, $match, null, $this->cursor)) {
+        if (preg_match('@</?('.$this->tagPrefix.')?:?@A', $this->template, $match, null, $this->cursor)) {
             $this->moveCursor($match[0]);
             $this->position = self::POSITION_DATA;
 
             return $match[0];
         }
+        // I think we'll never get there, or am I wrong?
         // @codeCoverageIgnoreStart
         else {
             throw new \Exception('this was not supposed to happen');

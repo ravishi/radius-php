@@ -22,7 +22,7 @@ class Context
             return $this->globals;
         } 
 
-        throw new \Exception(sprintf("tried to get an undefined property %s::%s", get_class($this), $attr));
+        throw new \InvalidArgumentException(sprintf("Property %s::%s does not exists", get_class($this), $key));
     }
 
     public function defineTag($name, $callable)
@@ -88,7 +88,7 @@ class Context
         return $result;
     }
 
-    private function qualifiedTagName($name)
+    protected function qualifiedTagName($name)
     {
         $nestingParts = array();
         foreach ($this->tagBindingStack as $binding) {
@@ -120,7 +120,7 @@ class Context
         }
     }
 
-    private function accuracy($try, $path)
+    protected function accuracy($try, $path)
     {
         $acc = 1000;
 
