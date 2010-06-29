@@ -32,7 +32,7 @@ Usage
 		));
 
 	// Create a parser to parse tags that begin with 'r:'
-	$parser = new Radius\Parser($context, array('tag_prefix' => 'r'));
+	$parser = new Radius\Parser($context, 'r');
 
 	// Parse and outputs the result
 	echo $parser->parse("A small example:\n<r:repeat times='3'>* <r:hello />!\n</r:repeat>");
