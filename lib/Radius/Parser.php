@@ -14,18 +14,36 @@ class Parser
         $context,
         $tagPrefix;
 
+    /**
+     * Constructs a new Parser instance
+     *
+     * You can pass NULL as first argument to let the Parser crate a new
+     * Context instance.
+     * 
+     * @param NULL|Radius\Context $context The Context instance to be used during render or NULL
+     * @param string $tagPrefix The tag prefix
+     * @access public
+     * @return void
+     */
     public function __construct($context = null, $tagPrefix = 'radius')
     {
-        if ($context instanceof Context) {
-            $this->context = $context;
+        if ($context === null) {
+            $this->context = new Context;
         }
         else {
-            $this->context = new Context;
+            $this->context = $context;
         }
 
         $this->tagPrefix = $tagPrefix;
     }
 
+    /**
+     * Parses a string and returns the result
+     * 
+     * @param string $string 
+     * @access public
+     * @return void
+     */
     public function parse($string)
     {
         $this->stack = array(new ParseContainerTag(null, array(), array(), function($t) {

@@ -25,20 +25,44 @@ class Context
         throw new \InvalidArgumentException(sprintf("Property %s::%s does not exists", get_class($this), $key));
     }
 
-    public function defineTag($name, $callable)
+    /**
+     * Define a tag
+     * 
+     * @param string $name 
+     * @param callback $callback 
+     * @access public
+     * @return void
+     */
+    public function defineTag($name, $callback)
     {
-        $this->definitions[$name] = $callable;
+        $this->definitions[$name] = $callback;
     }
 
+    /**
+     * A convenient method to define many tags at once
+     * 
+     * @param array $tags A $tagName => $callable array of tags
+     * @access public
+     * @return void
+     */
     public function defineTags(array $tags)
     {
-        foreach ($tags as $name => $callable)
+        foreach ($tags as $name => $callback)
         {
-            $this->defineTag($name, $callable);
+            $this->defineTag($name, $callback);
         }
     }
 
-    public function renderTag($name, $attr = array(), $block = null)
+    /**
+     * Render a tag
+     * 
+     * @param string $name 
+     * @param array $attr An array of attributes
+     * @param callback|NULL $block Inner block of expandable tags
+     * @access public
+     * @return mixed the rendered tag
+     */
+    public function renderTag($name, array $attr = array(), $block = null)
     {
         if (($pos = strpos($name, ':')) != 0)
         {
@@ -58,12 +82,21 @@ class Context
             }
             else
             {
-                return $this->tagMissing($name, $attr, $block);
+                $this->tagMissing($name, $attr, $block);
             }
         }
     }
 
-    public function tagMissing($name, $attr = array(), $block = null)
+    /**
+     * Throws a UndefinedTagError
+     * 
+     * @param string $name 
+     * @param array $attr 
+     * @param callable|NULL $block 
+     * @access public
+     * @return void
+     */
+    public function tagMissing($name, array $attr = array(), $block = null)
     {
         throw new Error\UndefinedTagError($name);
     }
@@ -73,7 +106,7 @@ class Context
         return join(':', $this->tagBindingStack);
     }
 
-    private function stack($name, $attr = array(), $block, $call)
+    protected function stack($name, $attr, $block, $callback)
     {
         $previous = end($this->tagBindingStack);
         $previousLocals = $previous == null ? $this->globals : $previous->locals;
@@ -82,7 +115,7 @@ class Context
         $binding = new TagBinding($this, $locals, $name, $attr, $block);
 
         array_push($this->tagBindingStack, $binding);
-        $result = call_user_func($call, $binding);
+        $result = call_user_func($callback, $binding);
         array_pop($this->tagBindingStack);
 
         return $result;
@@ -120,6 +153,15 @@ class Context
         }
     }
 
+    /**
+     * Computes the numerical accuracy of a tag definition in comparsion with
+     * a path of nesting parts
+     * 
+     * @param array $try 
+     * @param array $path 
+     * @access protected
+     * @return int|false
+     */
     protected function accuracy($try, $path)
     {
         $acc = 1000;
